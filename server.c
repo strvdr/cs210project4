@@ -41,6 +41,7 @@ int main() {
       write(target, &req, sizeof(struct message));
       close(target); // Close target FIFO after writing
   }
+
   close(server);
   close(dummyfd);
   return 0;
