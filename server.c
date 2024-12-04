@@ -11,7 +11,7 @@ struct message {
 };
 
 void terminate(int sig) {
-    printf("Exiting...\n");
+    printf("Exiting....\n");
     fflush(stdout);
     exit(0);
 }
@@ -33,6 +33,7 @@ int main() {
   while (1) {
       // Read requests from serverFIFO
       if(read(server, &req, sizeof(struct message)) != sizeof(struct message)) continue;
+      printf("Received a request from %s to send the message %s to %s.\n",req.source,req.msg,req.target);
       printf("Received a request from %s to send the message %s to %s.\n", req.source, req.msg, req.target);
 
       // Open target FIFO and write the whole message struct to the target FIFO
