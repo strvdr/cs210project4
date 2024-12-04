@@ -24,6 +24,7 @@ int main() {
   struct message req;
 
   signal(SIGPIPE, SIG_IGN);  // Ignore broken pipe signals
+  signal(SIGINT,terminate);
 
   // Open the server FIFO for reading and a dummy write to keep it open
   server = open("serverFIFO", O_RDONLY);
@@ -41,6 +42,7 @@ int main() {
       close(target); // Close target FIFO after writing
   }
   close(server);
+  close(dummyfd);
   return 0;
 }
 

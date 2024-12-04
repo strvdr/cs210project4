@@ -111,6 +111,14 @@ int main(int argc, char **argv) {
 	}
 
 	if (strcmp(cmd,"sendmsg")==0) {
+      strcpy(line, line2);
+      char target[50];
+      strcpy(target, strtok(line + 8, " "));
+      
+      printf("target:%s\n", target);
+      printf("line2:%s\n", line2);
+      printf("line:%s\n", line);
+      
 		// TODO: Create the target user and
 		// the message string and call the sendmsg function
 
