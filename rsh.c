@@ -26,73 +26,57 @@ void terminate(int sig) {
         exit(0);
 }
 
-// TODO:
-// Send a request to the server to send the message (msg) to the target user (target)
-// by creating the message structure and writing it to server's FIFO
 void sendmsg(char *user, char *target, char *msg) {
   struct message msgStruct;
 
-  // Populate the message structure
   strncpy(msgStruct.source, user, sizeof(msgStruct.source) - 1);
-  msgStruct.source[sizeof(msgStruct.source) - 1] = '\0'; // Ensure null-termination
+  msgStruct.source[sizeof(msgStruct.source) - 1] = '\0';
 
   strncpy(msgStruct.target, target, sizeof(msgStruct.target) - 1);
-  msgStruct.target[sizeof(msgStruct.target) - 1] = '\0'; // Ensure null-termination
+  msgStruct.target[sizeof(msgStruct.target) - 1] = '\0';
 
   strncpy(msgStruct.msg, msg, sizeof(msgStruct.msg) - 1);
-  msgStruct.msg[sizeof(msgStruct.msg) - 1] = '\0'; // Ensure null-termination
+  msgStruct.msg[sizeof(msgStruct.msg) - 1] = '\0';
 
-  // Open the server FIFO for writing
   int serverFifo = open("serverFIFO", O_WRONLY);
-  if (serverFifo == -1) {
+  if(serverFifo == -1) {
     perror("Failed to open server FIFO");
     return;
   }
 
-  // Write the message structure to the FIFO
-  if (write(serverFifo, &msgStruct, sizeof(msgStruct)) == -1) {
+  if(write(serverFifo, &msgStruct, sizeof(msgStruct)) == -1) {
     perror("Failed to write to server FIFO");
   }
-
-    close(serverFifo);
+  
+  close(serverFifo);
 }
 
-	// TODO:
-	// Read user's own FIFO in an infinite loop for incoming messages
-	// The logic is similar to a server listening to requests
-	// print the incoming message to the standard output in the
-	// following format
-	// Incoming message from [source]: [message]
-	// put an end of line at the end of the message
-
 void* messageListener(void *arg) {
-    char fifoName[100];
+    char fifoName[20];
     snprintf(fifoName, sizeof(fifoName), "%s", uName);
 
-    // Open the user's FIFO for reading
     int userFifo = open(fifoName, O_RDONLY);
     if (userFifo == -1) {
-        perror("Failed to open user FIFO");
-        pthread_exit((void*)1);
+      perror("Failed to open user FIFO");
+      pthread_exit((void*)1);
     }
 
     struct message incomingMsg;
 
-    while (1) {
-        // Read the incoming message structure
-        ssize_t bytesRead = read(userFifo, &incomingMsg, sizeof(incomingMsg));
-        if (bytesRead == -1) {
-            perror("Failed to read from user FIFO");
-            break;
-        }
+    while(1) {
+      ssize_t bytesRead = read(userFifo, &incomingMsg, sizeof(incomingMsg));
+      if (bytesRead == -1) {
+        perror("Failed to read from user FIFO");
+        break;
+      }
 
-        if (bytesRead == sizeof(incomingMsg)) {
-            printf("Incoming message from %s: %s\n", incomingMsg.source, incomingMsg.msg);
-        }
+      if(bytesRead == sizeof(incomingMsg)) {
+        printf("Incoming message from %s: %s\n", incomingMsg.source, incomingMsg.msg);
+      }
     }
 
-    close(userFifo);
-    pthread_exit((void*)0);
+  close(userFifo);
+  pthread_exit((void*)0);
 }
 
 
@@ -122,10 +106,6 @@ int main(int argc, char **argv) {
 
     strcpy(uName,argv[1]);
 
-    // TODO:
-    // create the message listener thread
-
-
     pthread_t listenerThread;
     if (pthread_create(&listenerThread, NULL, messageListener, NULL) != 0) {
       perror("Failed to create message listener thread");
@@ -136,9 +116,9 @@ int main(int argc, char **argv) {
 
 	    fprintf(stderr,"rsh>");
 
-	    if (fgets(line,256,stdin)==NULL) continue;
+	    if(fgets(line,256,stdin)==NULL) continue;
 
-	    if (strcmp(line,"\n")==0) continue;
+	    if(strcmp(line,"\n")==0) continue;
 
 	    line[strlen(line)-1]='\0';
 
@@ -147,48 +127,33 @@ int main(int argc, char **argv) {
 	    strcpy(line2,line);
 	    strcpy(cmd,strtok(line," "));
 
-	    if (!isAllowed(cmd)) {
+	    if(!isAllowed(cmd)) {
 	    	printf("NOT ALLOWED!\n");
 	    	continue;
 	    }
 
-    
-		// TODO: Create the target user and
-		// the message string and call the sendmsg function
-    
-		// NOTE: The message itself can contain spaces
-		// If the user types: "sendmsg user1 hello there"
-		// target should be "user1" 
-		// and the message should be "hello there"
-
-		// if no argument is specified, you should print the following
-		// printf("sendmsg: you have to specify target user\n");
-		// if no message is specified, you should print the followingA
- 		// printf("sendmsg: you have to enter a message\n");
-
-
-      if (strcmp(cmd, "sendmsg") == 0) {
-          char *target = strtok(NULL, " ");
-          if (target == NULL) {
-              printf("sendmsg: you have to specify target user\n");
-              continue;
-          }
-      
-          char *message = strtok(NULL, "");
-          if (message == NULL) {
-              printf("sendmsg: you have to enter a message\n");
-              continue;
-          }
-      
-          sendmsg(uName, target, message);
+      if(strcmp(cmd, "sendmsg") == 0) {
+        char *target = strtok(NULL, " ");
+        if (target == NULL) {
+          printf("sendmsg: you have to specify target user\n");
           continue;
+        }
+      
+        char *message = strtok(NULL, "");
+        if (message == NULL) {
+          printf("sendmsg: you have to enter a message\n");
+          continue;
+        }
+      
+        sendmsg(uName, target, message);
+        continue;
       }
 
-	    if (strcmp(cmd,"exit")==0) break;
+	    if(strcmp(cmd,"exit")==0) break;
 
-	    if (strcmp(cmd,"cd")==0) {
+	    if(strcmp(cmd,"cd")==0) {
 	    	char *targetDir=strtok(NULL," ");
-	    	if (strtok(NULL," ")!=NULL) {
+	    	if(strtok(NULL," ")!=NULL) {
 	    		printf("-rsh: cd: too many arguments\n");
 	    	}
 	    	else {
@@ -197,7 +162,7 @@ int main(int argc, char **argv) {
 	    	continue;
 	    }
 
-	    if (strcmp(cmd,"help")==0) {
+	    if(strcmp(cmd,"help")==0) {
 	    	printf("The allowed commands are:\n");
 	    	for (int i=0;i<N;i++) {
 	    		printf("%d: %s\n",i+1,allowed[i]);
