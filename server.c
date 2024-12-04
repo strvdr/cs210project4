@@ -2,23 +2,24 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <string.h>
 #include <signal.h>
 
 struct message {
-    char source[50];
-    char target[50]; 
-    char msg[200]; // message body
+	char source[50];
+	char target[50]; 
+	char msg[200]; // message body
 };
 
 void terminate(int sig) {
-    printf("Exiting....\n");
-    fflush(stdout);
-    exit(0);
+	printf("Exiting....\n");
+	fflush(stdout);
+	exit(0);
 }
 
 int main() {
-  int target;
   int server;
+  int target;
   int dummyfd;
 
   struct message req;
